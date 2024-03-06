@@ -6,7 +6,7 @@ export default function handleResponseFromAPI(promise){
                 body: "success",
             })
         }else{
-            new Error();
+            reject(new Error());
         }
     })
     .then(console.log("Got a response from the API"))
