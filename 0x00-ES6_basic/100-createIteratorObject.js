@@ -1,9 +1,10 @@
-export default function createIteratorObject(report) {
+function createIteratorObject(report) {
   return (function* _() {
-    for (const department of Object.values(report.allEmployees)) {
-      for (const employee of department) {
-        yield employee;
+    for (const dept of Object.values(report.allEmployees)) {
+      for (const emp of dept) {
+        yield emp;
       }
     }
   }());
 }
+export default createIteratorObject
