@@ -7,4 +7,4 @@ function createIteratorObject(report) {
     }
   }());
 }
-export default createIteratorObject
+export default createIteratorObject;
