@@ -1,4 +1,4 @@
-class Car {
+export default class Car {
   constructor(brand, motor, color) {
     this.brand = brand;
     this.motor = motor;
@@ -38,5 +38,4 @@ class Car {
 
     return new Species();
   }
-  export default Car;
 }
