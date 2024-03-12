@@ -1,10 +1,6 @@
 export default function getListStudentIds(data){
     let idarr=[];
-    if (!Array.isArray)
-    {
-        return []
-    }
-    else if(typeof(data) == 'string')
+    if (!Array.isArray(data))
     {
         return []
     }
