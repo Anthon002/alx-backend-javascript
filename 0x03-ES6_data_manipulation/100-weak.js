@@ -1,7 +1,7 @@
-export const weakMap = new WeakMap();
+const weakMap = new WeakMap();
 const max_calls = 5;
 
-export function queryAPI(endpoint) {
+function queryAPI(endpoint) {
   if (!weakMap.has(endpoint)) {
     weakMap.set(endpoint, 0);
   }
@@ -10,3 +10,5 @@ export function queryAPI(endpoint) {
     throw new Error('Endpoint load is high');
   }
 }
+export weakMap;
+export queryAPI;
