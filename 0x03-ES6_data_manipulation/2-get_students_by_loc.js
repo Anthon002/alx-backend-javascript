@@ -1,12 +1,7 @@
 export default function getStudentsByLocation(data, location){
-    let objarr = []
-	if (Array.isArray(data)){
-    for (let i of data){
-        if (i.location == location){
-            objarr.push(i);
-        }
-    }
+	if (data instanceof Array) {
+	     let objarray = data.filter((student) => student.location === location);
+	     return objarray;
 	}
-    return objarr    
-    
+  return []; 
 }
