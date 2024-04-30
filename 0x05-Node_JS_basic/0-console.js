@@ -1,8 +1,8 @@
 /**
- * This module will display messages to the stdout
+ * module to display messages to the stdout
  */
-const displayMessage(_arg){
-  console.log(_arg);
+const displayMessage = (message_) => {
+  console.log(message_);
 };
 
 module.exports = displayMessage;
