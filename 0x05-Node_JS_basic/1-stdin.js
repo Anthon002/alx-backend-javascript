@@ -1,10 +1,14 @@
+/**
+  *module to print name
+  */
+
 process.stdout.write('Welcome to Holberton School, what is your name?\n');
 
 process.stdin.on('readable', () => {
-  const chunk = process.stdin.read();
+  const piece = process.stdin.read();
 
-  if (chunk) {
-    process.stdout.write(`Your name is: ${chunk}`);
+  if (piece) {
+    process.stdout.write(`Your name is: ${piece}`);
   }
 });
 
