@@ -1,7 +1,6 @@
 /**
-  *module to print name
-  */
-
+ * module to write out name
+ */
 process.stdout.write('Welcome to Holberton School, what is your name?\n');
 
 process.stdin.on('readable', () => {
