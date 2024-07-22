@@ -1,13 +1,19 @@
-process.stdout.write('Welcome to Holberton School, what is your name?\n');
-
-process.stdin.on('readable', () => {
-  const chunk = process.stdin.read();
-
-  if (chunk) {
-    process.stdout.write(`Your name is: ${chunk}`);
-  }
+/**
+ * this nodejs script to be executed through the command line
+ */
+const readline = require("readline");
+const rl_interface = readline.createInterface({
+	input: process.stdin,
+	output: process.stdout
 });
 
-process.stdin.on('end', () => {
-  process.stdout.write('This important software is now closing\n');
+console.log("Welcome to Holberton School, what is your name?")
+
+rl_interface.on('line',(input)=> {
+	console.log(`Your name is: ${input}`)
+	rl_interface.close();
 });
+
+rl_interface.on('end',()=>{
+	console.log("This important software is now closing\n")
+})
