@@ -14,6 +14,7 @@ rl_interface.on('line',(input)=> {
 	rl_interface.close();
 });
 
-rl_interface.on('end',()=>{
-	console.log("This important software is now closing\n")
+rl_interface.on('close',()=>{
+	console.log("This important software is now closing")
+	process.exit(0);
 })
