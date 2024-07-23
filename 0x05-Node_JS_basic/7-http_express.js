@@ -1,96 +1,89 @@
 const express = require('express');
-const fs = require('fs');
+const fileSystem = require('fs');
 
 const app = express();
-const PORT = 1245;
-const DB_FILE = process.argv.length > 2 ? process.argv[2] : '';
+const SERVER_PORT = 1245;
+const DATABASE_FILE = process.argv.length > 2 ? process.argv[2] : '';
 
 /**
- * Counts the students in a CSV data file.
- * @param {String} dataPath The path to the CSV data file.
- * @author Bezaleel Olakunori <https://github.com/B3zaleel>
+ * script to count the students in a CSV file.
+ * @param {String} filePath The path to the CSV file.
  */
-const countStudents = (dataPath) => new Promise((resolve, reject) => {
-  if (!dataPath) {
+const countStudents = (filePath) => new Promise((resolve, reject) => {
+  if (!filePath) {
     reject(new Error('Cannot load the database'));
   }
-  if (dataPath) {
-    fs.readFile(dataPath, (err, data) => {
-      if (err) {
+  if (filePath) {
+    fileSystem.readFile(filePath, (error, content) => {
+      if (error) {
         reject(new Error('Cannot load the database'));
       }
-      if (data) {
-        const reportParts = [];
-        const fileLines = data.toString('utf-8').trim().split('\n');
-        const studentGroups = {};
-        const dbFieldNames = fileLines[0].split(',');
-        const studentPropNames = dbFieldNames.slice(
-          0,
-          dbFieldNames.length - 1,
-        );
+      if (content) {
+        const reportSections = [];
+        const lines = content.toString('utf-8').trim().split('\n');
+        const studentCategories = {};
+        const headerFields = lines[0].split(',');
+        const studentFields = headerFields.slice(0, headerFields.length - 1);
 
-        for (const line of fileLines.slice(1)) {
-          const studentRecord = line.split(',');
-          const studentPropValues = studentRecord.slice(
-            0,
-            studentRecord.length - 1,
-          );
-          const field = studentRecord[studentRecord.length - 1];
-          if (!Object.keys(studentGroups).includes(field)) {
-            studentGroups[field] = [];
+        for (const row of lines.slice(1)) {
+          const studentData = row.split(',');
+          const studentValues = studentData.slice(0, studentData.length - 1);
+          const category = studentData[studentData.length - 1];
+          if (!Object.keys(studentCategories).includes(category)) {
+            studentCategories[category] = [];
           }
-          const studentEntries = studentPropNames.map((propName, idx) => [
-            propName,
-            studentPropValues[idx],
+          const studentInfo = studentFields.map((fieldName, index) => [
+            fieldName,
+            studentValues[index],
           ]);
-          studentGroups[field].push(Object.fromEntries(studentEntries));
+          studentCategories[category].push(Object.fromEntries(studentInfo));
         }
 
-        const totalStudents = Object.values(studentGroups).reduce(
-          (pre, cur) => (pre || []).length + cur.length,
+        const totalStudentCount = Object.values(studentCategories).reduce(
+          (prev, curr) => (prev || []).length + curr.length,
         );
-        reportParts.push(`Number of students: ${totalStudents}`);
-        for (const [field, group] of Object.entries(studentGroups)) {
-          reportParts.push([
-            `Number of students in ${field}: ${group.length}.`,
+        reportSections.push(`Number of students: ${totalStudentCount}`);
+        for (const [category, students] of Object.entries(studentCategories)) {
+          reportSections.push([
+            `Number of students in ${category}: ${students.length}.`,
             'List:',
-            group.map((student) => student.firstname).join(', '),
+            students.map((student) => student.firstname).join(', '),
           ].join(' '));
         }
-        resolve(reportParts.join('\n'));
+        resolve(reportSections.join('\n'));
       }
     });
   }
 });
 
-app.get('/', (_, res) => {
-  res.send('Hello Holberton School!');
+app.get('/', (_, response) => {
+  response.send('Hello Holberton School!');
 });
 
-app.get('/students', (_, res) => {
-  const responseParts = ['This is the list of our students'];
+app.get('/students', (_, response) => {
+  const responseSections = ['This is the list of our students'];
 
-  countStudents(DB_FILE)
+  countStudents(DATABASE_FILE)
     .then((report) => {
-      responseParts.push(report);
-      const responseText = responseParts.join('\n');
-      res.setHeader('Content-Type', 'text/plain');
-      res.setHeader('Content-Length', responseText.length);
-      res.statusCode = 200;
-      res.write(Buffer.from(responseText));
+      responseSections.push(report);
+      const responseMessage = responseSections.join('\n');
+      response.setHeader('Content-Type', 'text/plain');
+      response.setHeader('Content-Length', responseMessage.length);
+      response.statusCode = 200;
+      response.write(Buffer.from(responseMessage));
     })
     .catch((err) => {
-      responseParts.push(err instanceof Error ? err.message : err.toString());
-      const responseText = responseParts.join('\n');
-      res.setHeader('Content-Type', 'text/plain');
-      res.setHeader('Content-Length', responseText.length);
-      res.statusCode = 200;
-      res.write(Buffer.from(responseText));
+      responseSections.push(err instanceof Error ? err.message : err.toString());
+      const responseMessage = responseSections.join('\n');
+      response.setHeader('Content-Type', 'text/plain');
+      response.setHeader('Content-Length', responseMessage.length);
+      response.statusCode = 200;
+      response.write(Buffer.from(responseMessage));
     });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server listening on PORT ${PORT}`);
+app.listen(SERVER_PORT, () => {
+  console.log(`Server listening on PORT ${SERVER_PORT}`);
 });
 
 module.exports = app;
