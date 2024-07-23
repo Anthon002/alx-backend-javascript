@@ -1,9 +1,8 @@
 /**
- * Displays a message on the STDOUT.
- * @param {String} msg The message to display.
- * @author Bezaleel Olakunori <https://github.com/B3zaleel>
+ * script to print out a message on the console.
+ * @param {String} message_ The message to display.
  */
-const displayMessage = (msg) => {
+function displayMessage(message_){
   console.log(msg);
 };
 
