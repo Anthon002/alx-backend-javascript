@@ -1,111 +1,117 @@
-const httpServer = require('http');
-const fileSystem = require('fs');
+const http = require('http');
+const fs = require('fs');
 
-const SERVER_PORT = 1245;
-const SERVER_HOST = 'localhost';
-const serverApp = httpServer.createServer();
-const DATABASE_FILE = process.argv.length > 2 ? process.argv[2] : '';
+const PORT = 1245;
+const HOST = 'localhost';
+const app = http.createServer();
+const DB_FILE = process.argv.length > 2 ? process.argv[2] : '';
 
 /**
  * script to count the students in a CSV file.
- * @param {String} filePath path of the file.
+ * @param {String} filePath The path to the CSV file.
  */
 const countStudents = (filePath) => new Promise((resolve, reject) => {
   if (!filePath) {
     reject(new Error('Cannot load the database'));
   }
   if (filePath) {
-    fileSystem.readFile(filePath, (error, content) => {
-      if (error) {
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
         reject(new Error('Cannot load the database'));
       }
-      if (content) {
-        const reportSections = [];
-        const lines = content.toString('utf-8').trim().split('\n');
-        const studentCategories = {};
-        const headerFields = lines[0].split(',');
-        const studentFields = headerFields.slice(0, headerFields.length - 1);
+      if (data) {
+        const report_parts = [];
+        const lines_of_files = data.toString('utf-8').trim().split('\n');
+        const std_Grp = {};
+        const field_names_db = lines_of_files[0].split(',');
+        const studentPropNames = field_names_db.slice(
+          0,
+          field_names_db.length - 1,
+        );
 
-        for (const row of lines.slice(1)) {
-          const studentData = row.split(',');
-          const studentValues = studentData.slice(0, studentData.length - 1);
-          const category = studentData[studentData.length - 1];
-          if (!Object.keys(studentCategories).includes(category)) {
-            studentCategories[category] = [];
+        for (const line of lines_of_files.slice(1)) {
+          const studentRecord = line.split(',');
+          const studentPropValues = studentRecord.slice(
+            0,
+            studentRecord.length - 1,
+          );
+          const field = studentRecord[studentRecord.length - 1];
+          if (!Object.keys(std_Grp).includes(field)) {
+            std_Grp[field] = [];
           }
-          const studentInfo = studentFields.map((fieldName, index) => [
-            fieldName,
-            studentValues[index],
+          const studentEntries = studentPropNames.map((propName, idx) => [
+            propName,
+            studentPropValues[idx],
           ]);
-          studentCategories[category].push(Object.fromEntries(studentInfo));
+          std_Grp[field].push(Object.fromEntries(studentEntries));
         }
 
-        const totalStudentCount = Object.values(studentCategories).reduce(
-          (prev, curr) => (prev || []).length + curr.length,
+        const total_stds = Object.values(std_Grp).reduce(
+          (pre, cur) => (pre || []).length + cur.length,
         );
-        reportSections.push(`Number of students: ${totalStudentCount}`);
-        for (const [category, students] of Object.entries(studentCategories)) {
-          reportSections.push([
-            `Number of students in ${category}: ${students.length}.`,
+        report_parts.push(Number of students: ${total_stds});
+        for (const [field, group] of Object.entries(std_Grp)) {
+          report_parts.push([
+            Number of students in ${field}: ${group.length}.,
             'List:',
-            students.map((student) => student.firstname).join(', '),
+            group.map((student) => student.firstname).join(', '),
           ].join(' '));
         }
-        resolve(reportSections.join('\n'));
+        resolve(report_parts.join('\n'));
       }
     });
   }
 });
 
-const SERVER_ROUTES = [
+const SERVER_ROUTE_HANDLERS = [
   {
-    path: '/',
-    handler(_, response) {
-      const message = 'Hello Holberton School!';
+    route: '/',
+    handler(_, res) {
+      const responseText = 'Hello Holberton School!';
 
-      response.setHeader('Content-Type', 'text/plain');
-      response.setHeader('Content-Length', message.length);
-      response.statusCode = 200;
-      response.write(Buffer.from(message));
+      res.setHeader('Content-Type', 'text/plain');
+      res.setHeader('Content-Length', responseText.length);
+      res.statusCode = 200;
+      res.write(Buffer.from(responseText));
     },
   },
   {
-    path: '/students',
-    handler(_, response) {
-      const responseSections = ['This is the list of our students'];
+    route: '/students',
+    handler(_, res) {
+      const responseParts = ['This is the list of our students'];
 
-      countStudentsInCSV(DATABASE_FILE)
+      countStudents(DB_FILE)
         .then((report) => {
-          responseSections.push(report);
-          const responseMessage = responseSections.join('\n');
-          response.setHeader('Content-Type', 'text/plain');
-          response.setHeader('Content-Length', responseMessage.length);
-          response.statusCode = 200;
-          response.write(Buffer.from(responseMessage));
+          responseParts.push(report);
+          const responseText = responseParts.join('\n');
+          res.setHeader('Content-Type', 'text/plain');
+          res.setHeader('Content-Length', responseText.length);
+          res.statusCode = 200;
+          res.write(Buffer.from(responseText));
         })
         .catch((err) => {
-          responseSections.push(err instanceof Error ? err.message : err.toString());
-          const responseMessage = responseSections.join('\n');
-          response.setHeader('Content-Type', 'text/plain');
-          response.setHeader('Content-Length', responseMessage.length);
-          response.statusCode = 200;
-          response.write(Buffer.from(responseMessage));
+          responseParts.push(err instanceof Error ? err.message : err.toString());
+          const responseText = responseParts.join('\n');
+          res.setHeader('Content-Type', 'text/plain');
+          res.setHeader('Content-Length', responseText.length);
+          res.statusCode = 200;
+          res.write(Buffer.from(responseText));
         });
     },
   },
 ];
 
-serverApp.on('request', (request, response) => {
-  for (const routeHandler of SERVER_ROUTES) {
-    if (routeHandler.path === request.url) {
-      routeHandler.handler(request, response);
+app.on('request', (req, res) => {
+  for (const routeHandler of SERVER_ROUTE_HANDLERS) {
+    if (routeHandler.route === req.url) {
+      routeHandler.handler(req, res);
       break;
     }
   }
 });
 
-serverApp.listen(SERVER_PORT, SERVER_HOST, () => {
-  process.stdout.write(`Server listening at -> http://${SERVER_HOST}:${SERVER_PORT}\n`);
+app.listen(PORT, HOST, () => {
+  process.stdout.write(Server listening at -> http://${HOST}:${PORT}\n);
 });
 
-module.exports = serverApp;
+module.exports = app;
